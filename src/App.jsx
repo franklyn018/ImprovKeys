@@ -14,6 +14,7 @@ import AboutMe from './AboutMe';
 import ProjectInfo from './ProjectInfo';
 import PracticeLab from './PracticeLab';
 import Home from './Home';
+import Midi from './midi';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,6 +31,7 @@ function App() {
         <Route path="/about" element={<AboutMe />} />
         <Route path="/project" element={<ProjectInfo />} />
         <Route path="/practice" element={<PracticeLab />} />
+        <Route path="/midi" element={<Midi />} /> 
         <Route path="/lesson1" element={<Lesson1 />} />
         <Route path="/lesson2" element={<Lesson2 />} />
         <Route path="/demo1" element={<Demo1 />} />

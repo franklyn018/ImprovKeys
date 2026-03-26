@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 
 import {
   Card,
-  pageStyle,
-  cardStyle,
   buttonStyle,
   noteButtonStyle,
   outerStyle,
@@ -22,18 +20,18 @@ function PracticeLab() {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
 
-  const [selectedTrack, setSelectedTrack] = useState("backing1.mp3");
+  const [selectedTrack, setSelectedTrack] = useState("jam_session/backing1.mp3");
   const [volume, setVolume] = useState(0.7);
   const [activeNote, setActiveNote] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedURL, setRecordedURL] = useState(null);
 
   const chordProgressions = {
-    "backing1.mp3": ["C", "C", "Am", "Am"],
-    "backing2.mp3": ["C", "F", "Am", "G"],
-    "backing3.mp3": ["Am", "G", "Em", "F"],
-    "backing4.mp3": ["C", "Dm", "F", "G"],
-    "backing5.mp3": ["Dm", "Em", "F", "G"],
+    "jam_session/backing1.mp3": ["C", "C", "Am", "Am"],
+    "jam_session/backing2.mp3": ["C", "F", "Am", "G"],
+    "jam_session/backing3.mp3": ["Am", "G", "Em", "F"],
+    "jam_session/backing4.mp3": ["C", "Dm", "F", "G"],
+    "jam_session/backing5.mp3": ["Dm", "Em", "F", "G"],
   };
 
   const initAudio = () => {
@@ -49,13 +47,15 @@ function PracticeLab() {
     initAudio();
 
     const audio = new Audio(`/${noteFile}`);
-    audio.volume = volume;
+    audio.volume = Number(volume);
 
     const track = audioContextRef.current.createMediaElementSource(audio);
     track.connect(destinationRef.current);
     track.connect(audioContextRef.current.destination);
 
-    audio.play();
+    audio.play().catch((err) => {
+      console.error("Could not play note:", err);
+    });
 
     setActiveNote(noteName);
     setTimeout(() => setActiveNote(null), 150);
@@ -65,8 +65,10 @@ function PracticeLab() {
     const newTrack = e.target.value;
     setSelectedTrack(newTrack);
 
-    backingTrackRef.current.pause();
-    backingTrackRef.current.load();
+    if (backingTrackRef.current) {
+      backingTrackRef.current.pause();
+      backingTrackRef.current.load();
+    }
   };
 
   const startRecording = () => {
@@ -89,13 +91,18 @@ function PracticeLab() {
     mediaRecorder.start();
     setIsRecording(true);
 
-    // Recording always starts backing track
-    backingTrackRef.current.play();
+    backingTrackRef.current.play().catch((err) => {
+      console.error("Could not play backing track:", err);
+    });
   };
 
   const stopRecording = () => {
-    mediaRecorderRef.current.stop();
-    backingTrackRef.current.pause();
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+    if (backingTrackRef.current) {
+      backingTrackRef.current.pause();
+    }
     setIsRecording(false);
   };
 
@@ -108,7 +115,6 @@ function PracticeLab() {
           Choose a backing track, press play to practice, or press record to save your performance!
         </p>
 
-        {/* Track Selector */}
         <div style={{ marginBottom: "15px" }}>
           <label style={{ fontWeight: "bold" }}>Choose a backing track: </label>
           <select
@@ -116,15 +122,14 @@ function PracticeLab() {
             value={selectedTrack}
             style={{ padding: "8px", marginLeft: "10px" }}
           >
-            <option value="backing1.mp3">Backing Track 1</option>
-            <option value="backing2.mp3">Backing Track 2</option>
-            <option value="backing3.mp3">Backing Track 3</option>
-            <option value="backing4.mp3">Backing Track 4</option>
-            <option value="backing5.mp3">Backing Track 5</option>
+            <option value="jam_session/backing1.mp3">Backing Track 1</option>
+            <option value="jam_session/backing2.mp3">Backing Track 2</option>
+            <option value="jam_session/backing3.mp3">Backing Track 3</option>
+            <option value="jam_session/backing4.mp3">Backing Track 4</option>
+            <option value="jam_session/backing5.mp3">Backing Track 5</option>
           </select>
         </div>
 
-        {/* Volume */}
         <div style={{ marginBottom: "20px" }}>
           <label style={{ fontWeight: "bold" }}>Volume: </label>
           <input
@@ -138,25 +143,29 @@ function PracticeLab() {
           />
         </div>
 
-        {/* Backing Track */}
         <audio
           ref={backingTrackRef}
           src={`/${selectedTrack}`}
           loop
           onPlay={() => {
             initAudio();
-            const track = audioContextRef.current.createMediaElementSource(
-              backingTrackRef.current
-            );
-            track.connect(destinationRef.current);
-            track.connect(audioContextRef.current.destination);
+
+            if (!backingTrackRef.current._connectedToAudioContext) {
+              const track = audioContextRef.current.createMediaElementSource(
+                backingTrackRef.current
+              );
+              track.connect(destinationRef.current);
+              track.connect(audioContextRef.current.destination);
+              backingTrackRef.current._connectedToAudioContext = true;
+            }
           }}
         />
 
-        {/* Controls */}
         <div style={{ marginBottom: "20px" }}>
           <button
-            onClick={() => backingTrackRef.current.play()}
+            onClick={() => backingTrackRef.current.play().catch((err) => {
+              console.error("Could not play backing track:", err);
+            })}
             style={playButtonStyle}
           >
             ▶ Play
@@ -186,7 +195,6 @@ function PracticeLab() {
           </button>
         </div>
 
-        {/* Chord Progression */}
         <div
           style={{
             marginBottom: "25px",
@@ -202,13 +210,12 @@ function PracticeLab() {
           Chord Progression: {chordProgressions[selectedTrack].join(" → ")}
         </div>
 
-        {/* Piano Buttons */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
           {["C", "D", "E", "F", "G", "A", "B"].map((note) => (
             <button
               key={note}
               onClick={() =>
-                playNote(`${note.toLowerCase()}-note.mp3`, note)
+                playNote(`jam_session/${note.toLowerCase()}-note.mp3`, note)
               }
               style={{
                 ...noteButtonStyle,
@@ -220,7 +227,6 @@ function PracticeLab() {
           ))}
         </div>
 
-        {/* Playback Recording */}
         {recordedURL && (
           <div style={{ marginTop: "20px" }}>
             <h3>Your Recording:</h3>
@@ -232,23 +238,49 @@ function PracticeLab() {
           </div>
         )}
 
-        <Link to="/">
-          <button
-            style={{
-              padding: "18px 40px",
-              fontSize: "20px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              borderRadius: "50px",
-              border: "none",
-              background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
-              color: "white",
-              marginTop: "20px",
-            }}
-          >
-            Go to Home →
-          </button>
-        </Link>
+        <div
+          style={{
+            marginTop: "25px",
+            display: "flex",
+            justifyContent: "center",
+            gap: "15px",
+            flexWrap: "wrap",
+          }}
+        >
+          <Link to="/midi">
+            <button
+              style={{
+                padding: "18px 40px",
+                fontSize: "20px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                borderRadius: "50px",
+                border: "none",
+                background: "linear-gradient(135deg, #10b981, #3b82f6)",
+                color: "white",
+              }}
+            >
+              Test MIDI Keyboard 🎹
+            </button>
+          </Link>
+
+          <Link to="/">
+            <button
+              style={{
+                padding: "18px 40px",
+                fontSize: "20px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                borderRadius: "50px",
+                border: "none",
+                background: "linear-gradient(135deg, #7c3aed, #3b82f6)",
+                color: "white",
+              }}
+            >
+              Go to Home →
+            </button>
+          </Link>
+        </div>
       </Card>
     </div>
   );

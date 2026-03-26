@@ -32,6 +32,7 @@ dist-ssr
 # Large video lesson files (ignored)
 public/lesson_videos/
 public/jam_session/
+public/sounds/
 
 # Ignore all large video formats everywhere
 *.mov

@@ -70,13 +70,18 @@ function Home({ isLoggedIn, userEmail, setIsLoggedIn, setUserEmail }) {
           <div
             style={{
               position: "fixed",
-              top: "20px",
-              left: "20px",
+              top: "42px",
+              left: "30px",
               zIndex: 1000,
-              fontWeight: "bold",
+              fontSize: "20px",
+              fontWeight: "800",
+              fontFamily: '"Helvetica Neue", "Avenir Next", "Segoe UI", sans-serif',
+              color: "#ffffff",
+              textShadow: "0 4px 20px rgba(124, 58, 237, 0.55)",
+              letterSpacing: "0.8px",
             }}
           >
-            Welcome, {userEmail}
+            Welcome, <span style={{ color: "#a78bfa" }}>{userEmail}</span>
           </div>
 
           <div

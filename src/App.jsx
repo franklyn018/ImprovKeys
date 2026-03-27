@@ -44,7 +44,7 @@ function App() {
           setUserEmail(email);
           }}
         />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Register setIsLoggedIn={setIsLoggedIn} setUserEmail={setUserEmail} />} />
         <Route path="/private" element={<PrivateRoute />} />
       </Routes>
     </Router>

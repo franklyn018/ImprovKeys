@@ -26,7 +26,7 @@ function Demo1() {
         </p>
 
         <div style={{ marginBottom: "30px" }}>
-          <audio ref={backingTrackRef} src="/backing1.mp3" loop />
+          <audio ref={backingTrackRef} src="jam_session/backing1.mp3" loop />
 
           <button
             onClick={() => backingTrackRef.current.play()}
@@ -48,7 +48,7 @@ function Demo1() {
           {["C", "E", "G"].map((note) => (
             <button
               key={note}
-              onClick={() => playNote(`${note.toLowerCase()}-note.mp3`, note)}
+              onClick={() => playNote(`jam_session/${note.toLowerCase()}-note.mp3`, note)}
               style={{
                 ...noteButtonStyle,
                 ...(activeNote === note ? glowStyle : {})
@@ -82,6 +82,31 @@ function Demo1() {
             Go to Lesson 3 →
           </button>
         </Link>
+
+        {/* 🔥 Added Back to Home Button */}
+        <div style={{ marginTop: "15px" }}>
+          <Link to="/">
+            <button
+              style={{
+                padding: "18px 40px",
+                fontSize: "20px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                borderRadius: "50px",
+                border: "none",
+                background: "linear-gradient(135deg, #6b7280, #374151)",
+                color: "white",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.3)",
+              }}
+              onMouseOver={(e) => e.target.style.transform = "scale(1.05)"}
+              onMouseOut={(e) => e.target.style.transform = "scale(1)"}
+            >
+              ← Back to Home
+            </button>
+          </Link>
+        </div>
+
       </Card>
     </div>
   );
